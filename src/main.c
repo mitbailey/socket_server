@@ -21,14 +21,14 @@
 
 int main(int argc, char *argv[])
 {
-    int server_socket, client_socket, socket_size;
+    int listening_socket, accepted_socket, socket_size;
     struct sockaddr_in server_address, client_address;
     char client_message[MAX_SIZE_CLIENT_MESSAGE];
     memset(client_message, 0x0, MAX_SIZE_CLIENT_MESSAGE);
 
     // Create socket.
-    server_socket = socket(AF_INET, SOCK_STREAM, 0);
-    if (server_socket == -1)
+    listening_socket = socket(AF_INET, SOCK_STREAM, 0);
+    if (listening_socket == -1)
     {
         printf("Could not create socket.\n");
     }
@@ -49,39 +49,39 @@ int main(int argc, char *argv[])
     struct timeval timeout;
     timeout.tv_sec = RECV_TIMEOUT;
     timeout.tv_usec = 0;
-    setsockopt(server_socket, SOL_SOCKET, SO_RCVTIMEO, (const char *)&timeout, sizeof(timeout));
+    setsockopt(listening_socket, SOL_SOCKET, SO_RCVTIMEO, (const char *)&timeout, sizeof(timeout));
 
     // Bind.
-    if (bind(server_socket, (struct sockaddr *)&server_address, sizeof(server_address)) < 0)
+    if (bind(listening_socket, (struct sockaddr *)&server_address, sizeof(server_address)) < 0)
     {
         printf("Error: Port binding failed.\n");
         perror("bind");
-        return 1;
+        return -1;
     }
     printf("Bound to port.\n");
 
     while (1)
     {
         // Listen.
-        listen(server_socket, 3);
+        listen(listening_socket, 3);
 
         // Accept an incoming connection.
         printf("Waiting for incoming connections...\n");
         socket_size = sizeof(struct sockaddr_in);
 
         // Accept connection from an incoming client.
-        client_socket = accept(server_socket, (struct sockaddr *)&client_address, (socklen_t *)&socket_size);
-        if (client_socket < 0)
+        accepted_socket = accept(listening_socket, (struct sockaddr *)&client_address, (socklen_t *)&socket_size);
+        if (accepted_socket < 0)
         {
             if (errno == EAGAIN)
             {
-                printf("Waiting for connection timed-out.\n");
+                // printf("Waiting for connection timed-out.\n");
                 continue;
             }
             else
             {
                 perror("accept failed");
-                return -1;
+                continue;
             }
         }
         printf("Connection accepted.\n");
@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
         int read_size = 0;
         while (read_size >= 0)
         {
-            read_size = recv(client_socket, client_message, 2000, 0);
+            read_size = recv(accepted_socket, client_message, 2000, 0);
             if (read_size > 0)
             {
                 printf("PRINTING CLIENT MESSAGE: ");
@@ -103,8 +103,11 @@ int main(int argc, char *argv[])
             }
             printf("Read Size: %d\n", read_size);
         }
-
-        printf("Timeout, closing connection.\n");
+        if (errno == EAGAIN)
+        {
+            printf("Active connection timed-out.\n");
+            continue;
+        }
     }
 
     return 0;
