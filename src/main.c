@@ -22,7 +22,7 @@
 int main(int argc, char *argv[])
 {
     int listening_socket, accepted_socket, socket_size;
-    struct sockaddr_in server_address, client_address;
+    struct sockaddr_in listening_address, accepted_address;
     char client_message[MAX_SIZE_CLIENT_MESSAGE];
     memset(client_message, 0x0, MAX_SIZE_CLIENT_MESSAGE);
 
@@ -35,12 +35,12 @@ int main(int argc, char *argv[])
     printf("Socket created.\n");
 
     // Prepare the sockaddr_in structure.
-    server_address.sin_family = AF_INET;
-    server_address.sin_addr.s_addr = INADDR_ANY;
-    server_address.sin_port = htons(SERVER_PORT);
+    listening_address.sin_family = AF_INET;
+    listening_address.sin_addr.s_addr = INADDR_ANY;
+    listening_address.sin_port = htons(SERVER_PORT);
 
     // Set the IP address.
-    if (inet_pton(AF_INET, SERVER_IP_ADDRESS, &server_address.sin_addr) <= 0)
+    if (inet_pton(AF_INET, SERVER_IP_ADDRESS, &listening_address.sin_addr) <= 0)
     {
         printf("Invalid address; Address not supported.\n");
     }
@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
     setsockopt(listening_socket, SOL_SOCKET, SO_RCVTIMEO, (const char *)&timeout, sizeof(timeout));
 
     // Bind.
-    if (bind(listening_socket, (struct sockaddr *)&server_address, sizeof(server_address)) < 0)
+    if (bind(listening_socket, (struct sockaddr *)&listening_address, sizeof(listening_address)) < 0)
     {
         printf("Error: Port binding failed (%s:%d).\n", SERVER_IP_ADDRESS, SERVER_PORT);
         perror("bind");
@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
         socket_size = sizeof(struct sockaddr_in);
 
         // Accept connection from an incoming client.
-        accepted_socket = accept(listening_socket, (struct sockaddr *)&client_address, (socklen_t *)&socket_size);
+        accepted_socket = accept(listening_socket, (struct sockaddr *)&accepted_address, (socklen_t *)&socket_size);
         if (accepted_socket < 0)
         {
             if (errno == EAGAIN)
