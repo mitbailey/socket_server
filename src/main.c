@@ -55,12 +55,12 @@ int main(int argc, char *argv[])
     // Bind.
     if (bind(listening_socket, (struct sockaddr *)&server_address, sizeof(server_address)) < 0)
     {
-        printf("Error: Port binding failed.\n");
+        printf("Error: Port binding failed (%s:%d).\n", SERVER_IP_ADDRESS, SERVER_PORT);
         perror("bind");
         return -1;
     }
-    printf("Bound to port.\n");
-
+    printf("Bound to port (%s:%d).\n", SERVER_IP_ADDRESS, SERVER_PORT);
+    
     while (1)
     {
         // Listen.

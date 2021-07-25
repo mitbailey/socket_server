@@ -14,7 +14,7 @@
 
 #define MAX_SIZE_CLIENT_MESSAGE 0x800
 #define SERVER_IP_ADDRESS "127.0.0.1"
-#define SERVER_PORT 1924
+#define SERVER_PORT 51924
 #define RECV_TIMEOUT 10 // seconds
 
 #endif // SERVER_H
