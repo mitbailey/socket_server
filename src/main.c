@@ -22,7 +22,6 @@
 int main(int argc, char *argv[])
 {
     int listening_socket, accepted_socket, socket_size;
-    int read_size = 0;
     struct sockaddr_in server_address, client_address;
     char client_message[MAX_SIZE_CLIENT_MESSAGE];
     memset(client_message, 0x0, MAX_SIZE_CLIENT_MESSAGE);
@@ -63,6 +62,8 @@ int main(int argc, char *argv[])
     
     while (1)
     {
+        int read_size = 0;
+
         // Listen.
         listen(listening_socket, 3);
 
