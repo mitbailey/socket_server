@@ -1,5 +1,5 @@
 CXX = gcc
-COBJS = src/main.o
+COBJS = src/main.o src/server.o
 CXXFLAGS = -I ./include/ -Wall -pthread
 TARGET = server.out
 

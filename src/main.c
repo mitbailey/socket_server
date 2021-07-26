@@ -13,9 +13,8 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <sys/socket.h>
+// #include <sys/socket.h>
 #include <arpa/inet.h>
-#include <unistd.h>
 #include <errno.h>
 #include "server.h"
 
@@ -25,6 +24,11 @@ int main(int argc, char *argv[])
     struct sockaddr_in listening_address, accepted_address;
     char client_message[MAX_SIZE_CLIENT_MESSAGE];
     memset(client_message, 0x0, MAX_SIZE_CLIENT_MESSAGE);
+    char ip_buffer[32] = SERVER_IP_ADDRESS;
+
+#ifdef AUTODETECT_IPV4
+    find_ipv4(ip_buffer, sizeof(ip_buffer));
+#endif
 
     // Create socket.
     listening_socket = socket(AF_INET, SOCK_STREAM, 0);
@@ -40,7 +44,7 @@ int main(int argc, char *argv[])
     listening_address.sin_port = htons(SERVER_PORT);
 
     // Set the IP address.
-    if (inet_pton(AF_INET, SERVER_IP_ADDRESS, &listening_address.sin_addr) <= 0)
+    if (inet_pton(AF_INET, ip_buffer, &listening_address.sin_addr) <= 0)
     {
         printf("Invalid address; Address not supported.\n");
     }
@@ -54,12 +58,12 @@ int main(int argc, char *argv[])
     // Bind.
     if (bind(listening_socket, (struct sockaddr *)&listening_address, sizeof(listening_address)) < 0)
     {
-        printf("Error: Port binding failed (%s:%d).\n", SERVER_IP_ADDRESS, SERVER_PORT);
+        printf("Error: Port binding failed (%s:%d).\n", ip_buffer, SERVER_PORT);
         perror("bind");
         return -1;
     }
-    printf("Bound to port (%s:%d).\n", SERVER_IP_ADDRESS, SERVER_PORT);
-    
+    printf("Bound to port (%s:%d).\n", ip_buffer, SERVER_PORT);
+
     while (1)
     {
         int read_size = 0;
